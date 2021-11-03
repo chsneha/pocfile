@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="18f1c495-44c6-44c2-982a-8eff98bd5d4b" >
+		<http:listener-connection host="0.0.0.0" port="8084" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="c290b4b0-1227-479c-abe9-fcb7cff76d92" >
+		<file:connection/>
+	</file:config>
+	<flow name="pocfileFlow" doc:id="393d4ea7-d474-4ae5-90a3-2699a3390009" >
+		<http:listener doc:name="Listener" doc:id="71a83ee7-5ebf-4886-a7c9-de4a84001099" config-ref="HTTP_Listener_config" path="/test"/>
+		<file:list doc:name="List" doc:id="3e24665f-97ef-4a52-9a74-26d0b1740614" config-ref="File_Config" directoryPath="C:\Users\sneha.cheekatimalla\OneDrive - Accenture\Desktop\files"/>
+		<ee:transform doc:name="Transform Message" doc:id="2675d671-a808-41fb-b35b-30e84cc9e062" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+(payload filter (($.attributes.fileName[0 to 25] != null)
+	
+)) orderBy (($.attributes.fileName[4 to 13]  ++  $.attributes.fileName[15 to 22])
+	as LocalDateTime{format: "yyyy-MM-ddHH.mm.ss"} as DateTime
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b9f5c939-c644-41c2-9387-0cfa729491be" message="#[payload]"/>
+	</flow>
+</mule>
